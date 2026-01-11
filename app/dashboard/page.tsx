@@ -1,8 +1,40 @@
+"use client";
+
+import { useState, useMemo } from "react";
+
 export default function DashboardPage() {
+  const [wallets, setWallets] = useState([
+    { name: "Main Wallet", balance: 24320, currency: "USD" },
+    { name: "Savings", balance: 88000, currency: "USD" },
+    { name: "Crypto", balance: 12430, currency: "USDT" },
+  ]);
+
+  const [transactions] = useState([
+    { name: "Spotify", amount: -12.99 },
+    { name: "Apple Store", amount: -199 },
+    { name: "Salary", amount: 4500 },
+    { name: "Netflix", amount: -15.99 },
+  ]);
+
+  const totalBalance = useMemo(
+    () => wallets.reduce((sum, w) => sum + w.balance, 0),
+    [wallets]
+  );
+
+  const monthlyIncome = useMemo(
+    () => transactions.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0),
+    [transactions]
+  );
+
+  const monthlySpending = useMemo(
+    () => transactions.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0),
+    [transactions]
+  );
+
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white p-8">
-      
-      {/* Page Header */}
+
+      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
@@ -10,18 +42,15 @@ export default function DashboardPage() {
             Welcome back — here’s your financial overview
           </p>
         </div>
-        <button className="bg-orange-500 hover:bg-orange-600 transition px-5 py-2 rounded-lg font-medium">
-          + Add Wallet
-        </button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
         {[
-          { label: "Total Balance", value: "$124,320" },
-          { label: "Monthly Income", value: "$8,420" },
-          { label: "Monthly Spending", value: "$3,280" },
-          { label: "Active Wallets", value: "5" },
+          { label: "Total Balance", value: `$${totalBalance.toLocaleString()}` },
+          { label: "Monthly Income", value: `$${monthlyIncome.toLocaleString()}` },
+          { label: "Monthly Spending", value: `$${monthlySpending.toLocaleString()}` },
+          { label: "Active Wallets", value: wallets.length },
         ].map((stat) => (
           <div
             key={stat.label}
@@ -41,7 +70,7 @@ export default function DashboardPage() {
           <h2 className="text-lg font-semibold mb-4">Balance Overview</h2>
 
           <div className="h-64 bg-gradient-to-br from-orange-500/20 to-transparent rounded-lg flex items-center justify-center text-gray-500">
-            Chart goes here
+            Total balance: ${totalBalance.toLocaleString()}
           </div>
         </div>
 
@@ -50,12 +79,7 @@ export default function DashboardPage() {
           <h2 className="text-lg font-semibold mb-4">Recent Transactions</h2>
 
           <div className="space-y-4">
-            {[
-              { name: "Spotify", amount: "-$12.99" },
-              { name: "Apple Store", amount: "-$199.00" },
-              { name: "Salary", amount: "+$4,500.00" },
-              { name: "Netflix", amount: "-$15.99" },
-            ].map((tx, i) => (
+            {transactions.map((tx, i) => (
               <div key={i} className="flex justify-between items-center">
                 <div>
                   <p className="font-medium">{tx.name}</p>
@@ -63,12 +87,10 @@ export default function DashboardPage() {
                 </div>
                 <p
                   className={`font-medium ${
-                    tx.amount.startsWith("+")
-                      ? "text-green-500"
-                      : "text-red-500"
+                    tx.amount > 0 ? "text-green-500" : "text-red-500"
                   }`}
                 >
-                  {tx.amount}
+                  {tx.amount > 0 ? "+" : "-"}${Math.abs(tx.amount).toFixed(2)}
                 </p>
               </div>
             ))}
@@ -81,14 +103,16 @@ export default function DashboardPage() {
         <h2 className="text-lg font-semibold mb-4">Your Wallets</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {["Main Wallet", "Savings", "Crypto"].map((wallet) => (
+          {wallets.map((wallet) => (
             <div
-              key={wallet}
+              key={wallet.name}
               className="bg-[#18181b] rounded-xl p-6 border border-white/5 hover:border-orange-500/40 transition"
             >
-              <p className="text-gray-400 text-sm">{wallet}</p>
-              <p className="text-xl font-semibold mt-2">$12,430</p>
-              <p className="text-sm text-gray-500 mt-1">USD Balance</p>
+              <p className="text-gray-400 text-sm">{wallet.name}</p>
+              <p className="text-xl font-semibold mt-2">
+                ${wallet.balance.toLocaleString()}
+              </p>
+              <p className="text-sm text-gray-500 mt-1">{wallet.currency}</p>
             </div>
           ))}
         </div>
